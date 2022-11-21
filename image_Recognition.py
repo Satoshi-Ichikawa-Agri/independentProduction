@@ -22,11 +22,11 @@ def detect(imagefile_name, cascadefile_name):
         print('cannot load image')
         sys.exit(-1)
     
-    # 画像オブジェクトのコピー
+    # 画像オブジェクトのコピー(元画像の更新を防ぐ)
     dstimg = img.copy()
     dstimg = cv2.cvtColor(dstimg,cv2.COLOR_BGR2GRAY)
 
-    # 分類器の準備
+    # 分類器の準備(公式で配布しているファイルを引用)
     cascade = cv2.CascadeClassifier(cascadefile_name)
 
     # 分類器が空の時、処理を終了する
