@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<h1>index</h1>
+<h3>読み込む画像をアップロードしてください。</h3>
+<form action="/result" method="post" enctype="multipart/form-data">
+    <input type="file" name="uploadFile" accept=".png, .jpg, .jpeg, .webp">
+    <input type="submit" value="測定開始">
+</form>
 
 {% endblock %}

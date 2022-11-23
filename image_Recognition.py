@@ -6,8 +6,8 @@ import cv2
 
 
 def detect(imagefile_name, cascadefile_name):
-    """ 分類器と画像を指定し、特定の物体を検知する
-    Param: 
+    """分類器と画像を指定し、特定の物体を検知する
+    Param:
         imagefile_name: 対象となる静止画
         cascadefile_name: 静止画内の物体に合わせたカスケードファイル
     Return:
@@ -16,16 +16,15 @@ def detect(imagefile_name, cascadefile_name):
     """
     # 指定されたファイルを読み込む
     img = cv2.imread(imagefile_name)
-
     # 読み込んだ画像が空の時、処理を終了する
     if img is None:
         print("cannot load image")
         sys.exit(-1)
-    
+
     # 画像オブジェクトのコピー(元画像の更新を防ぐ)
     copy_img = img.copy()
     # グレーに変える
-    copy_img_gray = cv2.cvtColor(copy_img,cv2.COLOR_BGR2GRAY)
+    copy_img_gray = cv2.cvtColor(copy_img, cv2.COLOR_BGR2GRAY)
 
     # 分類器の準備
     cascade = cv2.CascadeClassifier(cascadefile_name)
@@ -34,7 +33,7 @@ def detect(imagefile_name, cascadefile_name):
     if cascade.empty():
         print("cannnot load cascade file")
         sys.exit(-1)
-    
+
     # 分類器で画像を処理する
     detected_results = cascade.detectMultiScale(copy_img_gray, 1.03, 3)
     # 検出したList数をカウントし、個体数として取り出す
@@ -43,20 +42,24 @@ def detect(imagefile_name, cascadefile_name):
     # 分類器で検出した結果を取り出し、画像のrectangle加工を施す
     for (x, y, w, h) in detected_results:
         cv2.rectangle(copy_img_gray, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    
+
     return copy_img_gray, number_of_individuals
 
 
-if __name__ == "__main__":
-    result, count = detect('images/cat2.jpg', 'haarcascade_frontalcatface_extended.xml')
-    cv2.imwrite('images/result.jpg', result)
+def main(upload_file):
+    cascade_file = "haarcascade_frontalcatface_extended.xml"
+    result, count = detect(upload_file, cascade_file)
+    return result, count
 
+
+# if __name__ == "__main__":
+#     result, count = detect("images/cat2.jpg", "haarcascade_frontalcatface_extended.xml")
+#     cv2.imwrite("images/result.jpg", result)
 
 
 """メモ欄
 ・猫のカスケードファイルは『haarcascade_frontalcatface_extended.xml』を採用する。
 ・detectMultiScaleの引数「scalefactor」は"1.03"を採用
-
 """
 
 """detectMultiScale()の引数メモ
@@ -77,5 +80,3 @@ if __name__ == "__main__":
 第6引数lineType: アルゴリズムの種類。OpenCVの独自コードで指定。
 第7引数shift: ビット数。int型で指定。デフォルト引数。
 """
-
-
