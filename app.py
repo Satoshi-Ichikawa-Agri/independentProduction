@@ -2,15 +2,21 @@
 input: 画像
 output: 検出された個数を出力
 """
+import os
+
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask import redirect
+from flask import url_for
+from flask import send_from_directory
+import numpy as np
 
 import image_Recognition as ir
 
 
 # Flaskオブジェクトの生成
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="")
 
 
 @app.route("/")
@@ -29,10 +35,10 @@ def result():
         count
     """
     file = request.files["uploadFile"]
-    file = str(file)
-    result, count = ir.main(file)
+    ir.imege_save(file)
+    ir.convert_gray("static/images/test.jpg")
 
-    return render_template("result.html", count=count)
+    return render_template("result.html")
 
 
 if __name__ == "__main__":

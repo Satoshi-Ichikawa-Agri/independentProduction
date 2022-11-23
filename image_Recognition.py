@@ -3,6 +3,37 @@
 """
 import sys
 import cv2
+import numpy as np
+from PIL import Image
+
+
+def imege_save(upload_img):
+    """Web上からアップロードされた画像ファイルを保存する
+    Pillowで実装する。
+    Param:
+        upload_img:
+    """
+    img = Image.open(upload_img)
+    img.save("static/images/test.jpg")
+
+
+def convert_gray(imagefile):
+    """
+    Param:
+    Return:
+    """
+    # 指定されたファイルを読み込む
+    img = Image.open("images/cat.png")
+    # img = cv2.imread(imagefile)
+    # 読み込んだ画像が空の時、処理を終了する
+    if img is None:
+        print("cannot load image")
+        sys.exit(-1)
+    # グレーに変える
+    copy_img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("static/images/test_gray.jpg", imagefile)
+
+    return copy_img_gray
 
 
 def detect(imagefile_name, cascadefile_name):
@@ -11,21 +42,11 @@ def detect(imagefile_name, cascadefile_name):
         imagefile_name: 対象となる静止画
         cascadefile_name: 静止画内の物体に合わせたカスケードファイル
     Return:
-        return copy_img_gray: 検出しレクタングルされた静止画
+        copy_img_gray: 検出しレクタングルされた静止画
         number_of_individuals: 検出した個体数
     """
-    # 指定されたファイルを読み込む
-    img = cv2.imread(imagefile_name)
-    # 読み込んだ画像が空の時、処理を終了する
-    if img is None:
-        print("cannot load image")
-        sys.exit(-1)
 
-    # 画像オブジェクトのコピー(元画像の更新を防ぐ)
-    copy_img = img.copy()
-    # グレーに変える
-    copy_img_gray = cv2.cvtColor(copy_img, cv2.COLOR_BGR2GRAY)
-
+    img = convert_gray(imagefile_name)
     # 分類器の準備
     cascade = cv2.CascadeClassifier(cascadefile_name)
 
@@ -35,15 +56,16 @@ def detect(imagefile_name, cascadefile_name):
         sys.exit(-1)
 
     # 分類器で画像を処理する
-    detected_results = cascade.detectMultiScale(copy_img_gray, 1.03, 3)
+    detected_results = cascade.detectMultiScale(img, 1.03, 3)
+
     # 検出したList数をカウントし、個体数として取り出す
     number_of_individuals = len(detected_results)
 
     # 分類器で検出した結果を取り出し、画像のrectangle加工を施す
     for (x, y, w, h) in detected_results:
-        cv2.rectangle(copy_img_gray, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-    return copy_img_gray, number_of_individuals
+    return img, number_of_individuals
 
 
 def main(upload_file):
@@ -53,8 +75,8 @@ def main(upload_file):
 
 
 # if __name__ == "__main__":
-#     result, count = detect("images/cat2.jpg", "haarcascade_frontalcatface_extended.xml")
-#     cv2.imwrite("images/result.jpg", result)
+# result, count = detect(b, "haarcascade_frontalcatface_extended.xml")
+# cv2.imwrite("static/images/result.jpg", result)
 
 
 """メモ欄
