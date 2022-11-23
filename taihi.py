@@ -1,73 +1,53 @@
-"""個体の識別をする
+""" かずまさんのレビュー結果
+アドバイスあり
 """
-import cv2
-import face_recognition
-import numpy as np
-from PIL import Image
 
-
-deactivate
-def find_face():
-    """ 物体を検出する関数
-    カスケード分類器とは、、、
-    物体検出を行うためには検出したい物体がどんな特徴を持っているのか、
-    該当する物体を含む画像と含まない画像（＝学習用画像）を用意し、検出したい物体の特徴を抽出します。
-    この特徴を「特徴量」と呼びますが、学習用画像すべての「特徴量」をまとめたデータのことを
-    「カスケード分類器」と呼びます。
+def detect(imagefile_name, cascadefile_name):
+    """ 分類器と画像を指定し、特定の物体を検知する
+    Param: 
+        imagefile_name: 対象となる静止画
+        cascadefile_name: 静止画内の物体に合わせたカスケードファイル
+    Return:
+        dstimg: 検出しレクタングルされた静止画
     """
-    # カスケードファイルを指定して、分類機を作成
-    cascade_file = "haarcascade_eye.xml"
-    cascade = cv2.CascadeClassifier(cascade_file)
-    # 画像を読み込み、グレイスケール(白黒)に変換
-    img = cv2.imread(original_woman_image)
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # 顔検出
-    face_list = cascade.detectMultiScale(img_gray)
+    outpath = "images/result.png"
+    
+    # 指定されたファイルを読み込む
+    img = cv2.imread(imagefile_name)
 
-    return face_list
+    # 読み込んだ画像が空の時、処理を終了する
+    if img is None:
+        print('cannot load image')
+        sys.exit(-1)
+    
+    # 画像オブジェクトのコピー(元画像の更新を防ぐ)
+    dstimg = img.copy()
+    dstimg = cv2.cvtColor(dstimg, cv2.COLOR_BGR2GRAY)
 
+    # 分類器の準備(公式で配布しているファイルを引用)
+    cascade = cv2.CascadeClassifier(cascadefile_name)
 
+    # 分類器が空の時、処理を終了する
+    if cascade.empty():
+        print('cannnot load cascade file')
+        sys.exit(-1)
+    
+    # 分類器で画像を処理する
+    objects = cascade.detectMultiScale(img, 1.03, 3)
+    count = len(objects)
 
+    for (x, y, w, h) in objects:
+        # print(x, y, w, h)
+        cv2.rectangle(dstimg, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    
+    cv2.imwrite(outpath, dstimg)
+    
+    return outpath, count
 
-
-
-
-
-
-
-
-
-
-
-# # 動画を読み込む
-# cap = cv2.VideoCapture(0)
-
-# # 動画ファイル保存用の設定
-# # カメラのFPSを取得
-# fps = int(cap.get(cv2.CAP_PROP_FPS))  
-# # カメラの横幅を取得
-# w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  
-# # カメラの縦幅を取得
-# h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  
-# # 動画保存時のfourcc設定(mp4用)
-# fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v") 
-# # 動画の仕様(ファイル名、fourcc, FPS, サイズ)
-# video = cv2.VideoWriter(
-#     "images/video.mp4", fourcc, fps, (w, h)
-# )  
-
-
-# while True:
-#     ret, frame = cap.read()
-#     if ret is False:
-#         break
-#     cv2.imshow("Image", frame)
-#     video.write(frame)
-#     if cv2.waitKey(1) & 0xFF == ord("q"):
-#         break
-# cap.release()
-
-
-# cv2.imshow("Image", frame)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+if __name__ == '__main__':
+    outpath, count = detect('images/cat2.jpg', 'cascade.xml')
+    outpath = cv2.imread(outpath)
+    print(count)
+    cv2.imshow("", outpath)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
