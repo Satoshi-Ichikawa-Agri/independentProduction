@@ -2,21 +2,19 @@
 input: 画像
 output: 検出された個数を出力
 """
-import os
-
 from flask import Flask
 from flask import render_template
 from flask import request
-from flask import redirect
-from flask import url_for
-from flask import send_from_directory
-import numpy as np
+import cv2
 
 import image_Recognition as ir
 
 
 # Flaskオブジェクトの生成
 app = Flask(__name__, static_url_path="")
+
+# 一旦「猫」限定でカスケードファイルを定義する
+cascade_file = "haarcascade_frontalcatface_extended.xml"
 
 
 @app.route("/")
@@ -32,13 +30,15 @@ def result():
     """POST
     Return:
         result.html
-        count
+        count: 検出結果の個数
     """
     file = request.files["uploadFile"]
     ir.imege_save(file)
     ir.convert_gray("static/images/test.jpg")
+    result, count = ir.detect("static/images/test_gray.jpg", cascade_file)
+    cv2.imwrite("static/images/test_gray_rectangle.jpg", result)
 
-    return render_template("result.html")
+    return render_template("result.html", count=count)
 
 
 if __name__ == "__main__":

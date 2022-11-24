@@ -1,9 +1,7 @@
 """ 特定物体の識別処理
-
 """
 import sys
 import cv2
-import numpy as np
 from PIL import Image
 
 
@@ -18,25 +16,23 @@ def imege_save(upload_img):
 
 
 def convert_gray(imagefile):
-    """
+    """画像のグレー変換
     Param:
-    Return:
+        imagefile: グレーに変換したい画像のパス
     """
     # 指定されたファイルを読み込む
-    img = Image.open("images/cat.png")
-    # img = cv2.imread(imagefile)
+    img = cv2.imread(imagefile)
     # 読み込んだ画像が空の時、処理を終了する
     if img is None:
         print("cannot load image")
         sys.exit(-1)
     # グレーに変える
     copy_img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite("static/images/test_gray.jpg", imagefile)
+    # グレー変換した画像を保存する
+    cv2.imwrite("static/images/test_gray.jpg", copy_img_gray)
 
-    return copy_img_gray
 
-
-def detect(imagefile_name, cascadefile_name):
+def detect(image_file, cascade_file_name):
     """分類器と画像を指定し、特定の物体を検知する
     Param:
         imagefile_name: 対象となる静止画
@@ -45,10 +41,10 @@ def detect(imagefile_name, cascadefile_name):
         copy_img_gray: 検出しレクタングルされた静止画
         number_of_individuals: 検出した個体数
     """
+    img = cv2.imread(image_file)
 
-    img = convert_gray(imagefile_name)
     # 分類器の準備
-    cascade = cv2.CascadeClassifier(cascadefile_name)
+    cascade = cv2.CascadeClassifier(cascade_file_name)
 
     # 分類器が空の時、処理を終了する
     if cascade.empty():
@@ -66,17 +62,6 @@ def detect(imagefile_name, cascadefile_name):
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
     return img, number_of_individuals
-
-
-def main(upload_file):
-    cascade_file = "haarcascade_frontalcatface_extended.xml"
-    result, count = detect(upload_file, cascade_file)
-    return result, count
-
-
-# if __name__ == "__main__":
-# result, count = detect(b, "haarcascade_frontalcatface_extended.xml")
-# cv2.imwrite("static/images/result.jpg", result)
 
 
 """メモ欄
