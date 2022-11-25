@@ -52,7 +52,7 @@ def detect(image_file, cascade_file_name):
         sys.exit(-1)
 
     # 分類器で画像を処理する
-    detected_results = cascade.detectMultiScale(img, 1.03, 3)
+    detected_results = cascade.detectMultiScale(img, 1.02, 3)
 
     # 検出したList数をカウントし、個体数として取り出す
     number_of_individuals = len(detected_results)
@@ -61,12 +61,15 @@ def detect(image_file, cascade_file_name):
     for (x, y, w, h) in detected_results:
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
+    cv2.imshow("rectangle", img)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
     return img, number_of_individuals
 
 
 """メモ欄
 ・猫のカスケードファイルは『haarcascade_frontalcatface_extended.xml』を採用する。
-・detectMultiScaleの引数「scalefactor」は"1.03"を採用
+・detectMultiScaleの引数「scalefactor」は"1.02"を採用
 """
 
 """detectMultiScale()の引数メモ
