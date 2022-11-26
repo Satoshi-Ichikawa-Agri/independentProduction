@@ -1,13 +1,16 @@
 """ 特定物体の識別処理
 """
+import os
 import sys
 import cv2
 from PIL import Image
 
+from database import UploadImages
+from database import DetectResult
+
 
 def imege_save(upload_img):
     """Web上からアップロードされた画像ファイルを保存する
-    Pillowで実装する。
     Param:
         upload_img:
     """
@@ -19,6 +22,7 @@ def imege_save(upload_img):
     else:
         cv2.imwrite("static/images/test" + str(i) + ".jpg", img)
         i += 1
+    UploadImages.create(image_name=)
 
     return img
 
