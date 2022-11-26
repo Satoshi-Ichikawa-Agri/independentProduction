@@ -53,7 +53,6 @@ def result():
     # detect&rectangle
     result, count = ir.detect(img_gray, cascade_file, original_file_path)
 
-    # result_list = DetectResult.select()
     query = DetectResult.select(
         DetectResult.id,
         UploadImages.image_name,
@@ -61,15 +60,7 @@ def result():
         DetectResult.created_date,
     ).join(UploadImages, on=(DetectResult.uploadImages == UploadImages.id))
 
-    print(query)
     query_result = query.execute()
-    # for i in query_result:
-    #     print(i.id)
-    #     print(i.image_name)
-    #     print(i.count)
-    #     print(i.created_date)
-
-    print(query_result)
 
     return render_template("result.html", count=count, query_result=query_result)
 
