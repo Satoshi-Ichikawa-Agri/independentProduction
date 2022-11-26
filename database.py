@@ -22,13 +22,15 @@ class BaseModel(Model):
 
 class UploadImages(BaseModel):
     id = IntegerField(primary_key=True)  # ID, 数値
-    image_name = CharField()  # 画像の名前, 文字列
+    image_name = CharField(unique=True)  # 画像の名前, 文字列
     created_date = DateTimeField(default=datetime.datetime.now)  # 作成日時
 
 
 class DetectResult(BaseModel):
     id = IntegerField(primary_key=True)  # ID, 数値
-    uploadImageId = ForeignKeyField(UploadImages)  # アップロード画像のID, 外部キー
+    uploadImages = ForeignKeyField(
+        UploadImages, backref="uploadImages"
+    )  # 外部キー(UploadImages)
     count = IntegerField()  # 検出結果の個数
     created_date = DateTimeField(default=datetime.datetime.now)  # 作成日時
 

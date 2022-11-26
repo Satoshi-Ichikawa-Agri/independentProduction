@@ -1,4 +1,4 @@
-""" Flaskによる、管理者画面のコントローラー
+""" Flaskによる、管理者画面のcontroller
 input: 画像
 output: 検出された個数を出力
 """
@@ -14,7 +14,7 @@ import image_Recognition as ir
 # Flaskオブジェクトの生成
 app = Flask(__name__, static_url_path="")
 
-# 一旦「猫」限定でカスケードファイルを定義する
+# 「猫」カスケードファイルを定義する
 cascade_file = "haarcascade_frontalcatface_extended.xml"
 
 
@@ -33,15 +33,21 @@ def result():
         result.html
         count: 検出結果の個数
     """
+    # 画面のアップロードファイルを取得
     file = request.files["uploadFile"]
+
+    # numpyarray型に変換
     file_ndarray = np.asarray(bytearray(file.read()), dtype=np.uint8)
     file_ndarray_decode = cv2.imdecode(file_ndarray, cv2.IMREAD_COLOR)
 
-    img = ir.imege_save(file_ndarray_decode)
+    # オリジナル画像をDBに保存する
+    original_file_path = ir.imege_save(file_ndarray_decode, file)
 
-    img_gray = ir.convert_gray(img)
+    # グレースケール
+    img_gray = ir.convert_gray(file_ndarray_decode)
 
-    result, count = ir.detect(img_gray, cascade_file)
+    # detect&rectangle
+    result, count = ir.detect(img_gray, cascade_file, original_file_path)
 
     return render_template("result.html", count=count)
 
@@ -54,9 +60,4 @@ if __name__ == "__main__":
 ・画面でのインプットはOK
 ただし、image_Recognition.pyを実行するとreturnができなくなり、結果画面まで遷移できなくなった。
 ※単純な画面遷移は出来た。
-
-TODO
-①デザインを整える。
-②識別の精度を見直す。
-③DBを作る
 """

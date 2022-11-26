@@ -3,54 +3,50 @@
 import os
 import sys
 import cv2
-from PIL import Image
 
 from database import UploadImages
 from database import DetectResult
 
 
-def imege_save(upload_img):
+BASE_PATH = "C:/Users/daiko/scamp/independentProduction/static/images/"
+
+
+def imege_save(processing_upload_file, original_file):
     """Web上からアップロードされた画像ファイルを保存する
     Param:
-        upload_img:
+        processing_upload_file: numpyarray型の画像ファイル
+        original_file: original画像ファイル
+    Return:
+        original_file: original画像ファイル
     """
-    img = upload_img
-    i = 1
-    if img is None or img == "":
-        print("cannot load image")
-        sys.exit(-1)
-    else:
-        cv2.imwrite("static/images/test" + str(i) + ".jpg", img)
-        i += 1
-    UploadImages.create(image_name=)
+    # 完全パスの作成
+    original_file_path = os.path.join(BASE_PATH + str(original_file.filename))
 
-    return img
+    # DB登録
+    UploadImages.create(image_name=original_file_path)
+
+    return original_file_path
 
 
 def convert_gray(imagefile):
     """画像のグレー変換
     Param:
         imagefile: グレーに変換したい画像のパス
+    Return:
+        copy_img_gray: グレースケールされた画像ファイル
     """
-    # 指定されたファイルを読み込む
-    img = imagefile
-    # img = cv2.imread(imagefile)
     # 読み込んだ画像が空の時、処理を終了する
-    if img is None:
+    if imagefile is None:
         print("cannot load image")
         sys.exit(-1)
-        # グレーに変える
-    copy_img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    i = 1
-    # グレー変換した画像を保存する
-    cv2.imwrite("static/images/test_gray" + str(i) + ".jpg", copy_img_gray)
-    i += 1
+    # グレーに変える
+    copy_img_gray = cv2.cvtColor(imagefile, cv2.COLOR_BGR2GRAY)
 
     return copy_img_gray
 
 
-def detect(image_file, cascade_file_name):
+def detect(image_file, cascade_file_name, original_file_path):
     """分類器と画像を指定し、特定の物体を検知する
     Param:
         imagefile_name: 対象となる静止画
@@ -59,7 +55,7 @@ def detect(image_file, cascade_file_name):
         copy_img_gray: 検出しレクタングルされた静止画
         number_of_individuals: 検出した個体数
     """
-    img = image_file
+    img = UploadImages.get(image_name=original_file_path)
 
     # 分類器の準備
     cascade = cv2.CascadeClassifier(cascade_file_name)
@@ -70,23 +66,21 @@ def detect(image_file, cascade_file_name):
         sys.exit(-1)
 
     # 分類器で画像を処理する
-    detected_results = cascade.detectMultiScale(img, 1.02, 3)
+    detected_results = cascade.detectMultiScale(image_file, 1.02, 3)
 
     # 検出したList数をカウントし、個体数として取り出す
     number_of_individuals = len(detected_results)
 
     # 分類器で検出した結果を取り出し、画像のrectangle加工を施す
     for (x, y, w, h) in detected_results:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv2.rectangle(image_file, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-    i = 1
-    cv2.imwrite("static/images/test_gray_rectangle" + str(i) + ".jpg", img)
-    i += 1
+    DetectResult.create(uploadImages_id=img.id, count=number_of_individuals)
 
-    cv2.imshow("rectangle", img)
+    cv2.imshow("rectangle", image_file)
     cv2.waitKey()
     cv2.destroyAllWindows()
-    return img, number_of_individuals
+    return image_file, number_of_individuals
 
 
 """メモ欄
