@@ -11,15 +11,16 @@ def imege_save(upload_img):
     Param:
         upload_img:
     """
-    img = Image.open(upload_img)
+    img = upload_img
+    i = 1
+    if img is None or img == "":
+        print("cannot load image")
+        sys.exit(-1)
+    else:
+        cv2.imwrite("static/images/test" + str(i) + ".jpg", img)
+        i += 1
 
-    while True:
-        if img is None or img == "":
-            break
-        else:
-            i = 1
-            img.save("static/images/test" + str(i) + ".jpg")
-            i += 1
+    return img
 
 
 def convert_gray(imagefile):
@@ -28,15 +29,21 @@ def convert_gray(imagefile):
         imagefile: グレーに変換したい画像のパス
     """
     # 指定されたファイルを読み込む
-    img = cv2.imread(imagefile)
+    img = imagefile
+    # img = cv2.imread(imagefile)
     # 読み込んだ画像が空の時、処理を終了する
     if img is None:
         print("cannot load image")
         sys.exit(-1)
-    # グレーに変える
+        # グレーに変える
     copy_img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    i = 1
     # グレー変換した画像を保存する
-    cv2.imwrite("static/images/test_gray.jpg", copy_img_gray)
+    cv2.imwrite("static/images/test_gray" + str(i) + ".jpg", copy_img_gray)
+    i += 1
+
+    return copy_img_gray
 
 
 def detect(image_file, cascade_file_name):
@@ -48,7 +55,7 @@ def detect(image_file, cascade_file_name):
         copy_img_gray: 検出しレクタングルされた静止画
         number_of_individuals: 検出した個体数
     """
-    img = cv2.imread(image_file)
+    img = image_file
 
     # 分類器の準備
     cascade = cv2.CascadeClassifier(cascade_file_name)
@@ -68,14 +75,15 @@ def detect(image_file, cascade_file_name):
     for (x, y, w, h) in detected_results:
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
+    i = 1
+    cv2.imwrite("static/images/test_gray_rectangle" + str(i) + ".jpg", img)
+    i += 1
+
     cv2.imshow("rectangle", img)
     cv2.waitKey()
     cv2.destroyAllWindows()
     return img, number_of_individuals
 
-
-if __name__ == "__main__":
-    detect()
 
 """メモ欄
 ・猫のカスケードファイルは『haarcascade_frontalcatface_extended.xml』を採用する。

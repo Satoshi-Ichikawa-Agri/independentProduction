@@ -6,6 +6,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 import cv2
+import numpy as np
 
 import image_Recognition as ir
 
@@ -33,10 +34,14 @@ def result():
         count: 検出結果の個数
     """
     file = request.files["uploadFile"]
-    ir.imege_save(file)
-    ir.convert_gray("static/images/test.jpg")
-    result, count = ir.detect("static/images/test_gray.jpg", cascade_file)
-    cv2.imwrite("static/images/test_gray_rectangle.jpg", result)
+    file_ndarray = np.asarray(bytearray(file.read()), dtype=np.uint8)
+    file_ndarray_decode = cv2.imdecode(file_ndarray, cv2.IMREAD_COLOR)
+
+    img = ir.imege_save(file_ndarray_decode)
+
+    img_gray = ir.convert_gray(img)
+
+    result, count = ir.detect(img_gray, cascade_file)
 
     return render_template("result.html", count=count)
 
