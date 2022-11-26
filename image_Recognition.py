@@ -25,6 +25,9 @@ def imege_save(processing_upload_file, original_file):
     # DB登録
     UploadImages.create(image_name=original_file_path)
 
+    # 画像をディレクトリに保存
+    cv2.imwrite(original_file_path, processing_upload_file)
+
     return original_file_path
 
 
@@ -71,15 +74,17 @@ def detect(image_file, cascade_file_name, original_file_path):
     # 検出したList数をカウントし、個体数として取り出す
     number_of_individuals = len(detected_results)
 
-    # 分類器で検出した結果を取り出し、画像のrectangle加工を施す
+    # 分類器で検出した結果を取り出し、画像にrectangle加工を施す
     for (x, y, w, h) in detected_results:
         cv2.rectangle(image_file, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
+    # DBに登録する
     DetectResult.create(uploadImages_id=img.id, count=number_of_individuals)
 
     cv2.imshow("rectangle", image_file)
     cv2.waitKey()
     cv2.destroyAllWindows()
+
     return image_file, number_of_individuals
 
 

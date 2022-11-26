@@ -7,8 +7,11 @@ from flask import render_template
 from flask import request
 import cv2
 import numpy as np
+from peewee import *
 
 import image_Recognition as ir
+from database import DetectResult
+from database import UploadImages
 
 
 # Flaskオブジェクトの生成
@@ -32,6 +35,7 @@ def result():
     Return:
         result.html
         count: 検出結果の個数
+        query: 検出結果のList
     """
     # 画面のアップロードファイルを取得
     file = request.files["uploadFile"]
@@ -49,7 +53,25 @@ def result():
     # detect&rectangle
     result, count = ir.detect(img_gray, cascade_file, original_file_path)
 
-    return render_template("result.html", count=count)
+    # result_list = DetectResult.select()
+    query = DetectResult.select(
+        DetectResult.id,
+        UploadImages.image_name,
+        DetectResult.count,
+        DetectResult.created_date,
+    ).join(UploadImages, on=(DetectResult.uploadImages == UploadImages.id))
+
+    print(query)
+    query_result = query.execute()
+    # for i in query_result:
+    #     print(i.id)
+    #     print(i.image_name)
+    #     print(i.count)
+    #     print(i.created_date)
+
+    print(query_result)
+
+    return render_template("result.html", count=count, query_result=query_result)
 
 
 if __name__ == "__main__":
