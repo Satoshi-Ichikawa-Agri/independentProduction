@@ -12,7 +12,14 @@ def imege_save(upload_img):
         upload_img:
     """
     img = Image.open(upload_img)
-    img.save("static/images/test.jpg")
+
+    while True:
+        if img is None or img == "":
+            break
+        else:
+            i = 1
+            img.save("static/images/test" + str(i) + ".jpg")
+            i += 1
 
 
 def convert_gray(imagefile):
@@ -66,6 +73,9 @@ def detect(image_file, cascade_file_name):
     cv2.destroyAllWindows()
     return img, number_of_individuals
 
+
+if __name__ == "__main__":
+    detect()
 
 """メモ欄
 ・猫のカスケードファイルは『haarcascade_frontalcatface_extended.xml』を採用する。
